@@ -4,7 +4,7 @@ from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
 from nimstat.parser import *
 from optparse import OptionParser
-
+import os
 
 __author__ = 'bresnaha'
 
@@ -46,7 +46,7 @@ def main(argv=sys.argv[1:]):
             print "The accounting file %s does not exist." % (opts.load)
             return 1
         print "loading the DB from %s" % (opts.load)
-        parse_file(sys.argv[1], db, log=logger)
+        parse_file(opts.load, db, log=logger)
 
 
 if __name__ == "__main__":
