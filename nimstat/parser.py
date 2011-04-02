@@ -2,6 +2,7 @@
 import shlex
 import sys
 import logging
+from nimstat.output import Spinner
 
 __author__ = 'bresnaha'
 
@@ -60,10 +61,13 @@ def parse_line(line):
 
 
 def parse_file(fname, db, log=logging):
+    spinner = Spinner()
     f = open(fname, "r")
     for line in f:
         attr = parse_line(line)
         if attr:
             db.add_event(attr)
-            sys.stdout.write(".")
-            sys.stdout.flush()
+            msg = spinner.next()
+            if msg:
+                sys.stdout.write("\r %s" % (msg))
+                sys.stdout.flush()
