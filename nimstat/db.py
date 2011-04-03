@@ -30,7 +30,7 @@ create_event_table = Table('create_events', metadata,
     Column('time', types.TIMESTAMP(), nullable=False),
     Column('uuid', String(64), nullable=False, unique=True),
     Column('eprkey', Integer),
-    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
     Column('request_minutes', Integer),
     Column('charge', Integer),
     Column('cpu_count', Integer),
@@ -46,7 +46,7 @@ remove_event_table = Table('remove_events', metadata,
     Column('time', types.TIMESTAMP(), nullable=False),
     Column('uuid', String(64), nullable=False, unique=True),
     Column('eprkey', Integer),
-    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
     Column('charge', Integer),
     Column('event_type_id', Integer, ForeignKey('event_type.id')),
     )
@@ -99,6 +99,7 @@ class NimStatDB(object):
 
     def __init__(self, dburl, module=None, log=logging):
 
+        self._commit_count = 0
         self._cloudconf_sections = {}
 
         if module == None:
@@ -132,7 +133,13 @@ class NimStatDB(object):
     def rollback(self):
         self._session.rollback()
 
-    def add_event(self, attrs):
+    def mod_commit(self):
+        self._commit_count =self._commit_count + 1
+        if self._commit_count == 100:
+            self._commit_count = 0
+            self.commit()
+
+    def add_event(self, attrs, spinner=None):
         user_ent = self._session.query(UserDB).filter(UserDB.dn == attrs['dn']).all()
         if not user_ent:
             user_ent = UserDB()
@@ -145,12 +152,17 @@ class NimStatDB(object):
         event_type = self._session.query(EventTypeDB).filter(EventTypeDB.name == attrs['type']).one()
 
         if attrs['type'] == "CREATED":
+            event_ent = self._session.query(CreateEventDB).filter(CreateEventDB.uuid == attrs['uuid']).all()
+            if event_ent:
+                spinner.already()
+                return
+
             event_ent = CreateEventDB()
             #  convert time Dec 16, 2010 10:59:59 AM
             event_ent.time = datetime.strptime(attrs['time'], "%b %d, %Y %I:%M:%S %p")
             event_ent.uuid = attrs['uuid']
             event_ent.eprkey = attrs['eprkey']
-            self.user = user_ent
+            event_ent.user = user_ent
             event_ent.requested_minutes = attrs['requestMinutes']
             event_ent.charge = attrs['charge']
             event_ent.cpu_count = attrs['CPUCount']
@@ -160,21 +172,32 @@ class NimStatDB(object):
             event_ent.network = attrs['network']
 
         elif attrs['type'] == "REMOVED":
+            # we could just let the db enforce this on the commit, but then we have to insert 1 at a time
+            event_ent = self._session.query(RemoveEventDB).filter(RemoveEventDB.uuid == attrs['uuid']).all()
+            if event_ent:
+                spinner.already()
+                return
+
             event_ent = RemoveEventDB()
 
             event_ent.time = datetime.strptime(attrs['time'], "%b %d, %Y %I:%M:%S %p")
             event_ent.uuid = attrs['uuid']
             event_ent.eprkey = attrs['eprkey']
             event_ent.charge = attrs['charge']
-            self.user = user_ent
+            event_ent.user = user_ent
 
         try:
             self.event_type = event_type
             self._session.add(event_ent)
-            self.commit()
+            self.mod_commit()
+            if spinner:
+                spinner.next()
         except sqlalchemy.exc.IntegrityError, ex:
             self.rollback()
-            print "The event %s already exists in the db" % (attrs['uuid'])
+            if spinner:
+                spinner.already()
+            print ex
+            #print "The event %s already exists in the db" % (attrs['uuid'])
 #        attrs['time']
 #        attrs['uuid']
 #        attrs['eprkey']

@@ -49,6 +49,9 @@ def main(argv=sys.argv[1:]):
         parse_file(opts.load, db, log=logger)
 
 
+    print "\nSuccess"
+
+
 if __name__ == "__main__":
     rc = main()
     sys.exit(rc)

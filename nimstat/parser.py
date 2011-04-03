@@ -66,8 +66,5 @@ def parse_file(fname, db, log=logging):
     for line in f:
         attr = parse_line(line)
         if attr:
-            db.add_event(attr)
-            msg = spinner.next()
-            if msg:
-                sys.stdout.write("\r %s" % (msg))
-                sys.stdout.flush()
+            db.add_event(attr, spinner=spinner)
+
