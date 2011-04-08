@@ -32,7 +32,7 @@ setup(name='nimstat',
       keywords = "Nimbus IaaS accounting graphs",
       long_description="""Some other time""",
       license="Apache2",
-      install_requires = ["sqlalchemy == 0.6"],
+      install_requires = ["sqlalchemy == 0.6", "matplotlib == 1.0.1"],
 
       classifiers=[
           'Development Status :: 4 - Beta',
