@@ -47,21 +47,27 @@ def make_pie(data, labels, filename, title=None):
     savefig(filename, format='png' )
 
 
-def make_bar(data, labels, filename, title=None, width=0.35, barcolor='r', xlabel=None, ylabel=None):
+def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel=None):
     cla()
 
-    N = len(data)
-    ind = np.arange(N)  # the x locations for the groups
+    x = arange(len(data))
     fig = plt.figure()
+    c = "bgrcmy"
     ax = fig.add_subplot(111)
-    ax.bar(ind, data, width, color=barcolor)
+    legs = []
+    for i in range(0, len(data)):
+        color = c[i % len(c)]
+        r = ax.bar([x[i],], [data[i],], color=color)
+        legs.append(r[0])
+    #xticks( x + 0.5,  labels)
+    ax.legend(legs, labels)
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:
         ax.set_xlabel(xlabel)
     if title:
         ax.set_title(title)
-    ax.set_xticks(ind+width)
-    ax.set_xticklabels(labels)
+
     savefig(filename, format='png' )
+
 
