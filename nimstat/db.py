@@ -232,8 +232,8 @@ class NimStatDB(object):
     def query(self):
         return self._q.all()
 
-    def query_count_users(self):
-        self._q = self._session.query(UserDB.id, func.count(UserDB.dn), UserDB.dn).join(RemoveEventDB)
+    def query_user_count(self):
+        self._q = self._session.query(UserDB.dn, func.count(UserDB.dn), UserDB.dn).join(RemoveEventDB)
         self._q = self._q.group_by(UserDB.dn)
 
     def query_montly_count(self):
@@ -241,11 +241,11 @@ class NimStatDB(object):
         self._q = self._q.group_by(func.strftime('%Y-%m', RemoveEventDB.time))
 
     def query_weekly_count(self):
-        self._q = self._session.query(func.strftime('%Y-%W', RemoveEventDB.time), func.count(RemoveEventDB.charge))
+        self._q = self._session.query(func.strftime('%W', RemoveEventDB.time), func.count(RemoveEventDB.charge))
         self._q = self._q.group_by(func.strftime('%Y-%W', RemoveEventDB.time))
 
-    def query_charges(self):
-        self._q = self._session.query(UserDB.id, func.sum(RemoveEventDB.charge), UserDB.dn).join(RemoveEventDB)
+    def query_user_charges(self):
+        self._q = self._session.query(UserDB.dn, func.sum(RemoveEventDB.charge), UserDB.dn).join(RemoveEventDB)
         self._q = self._q.group_by(UserDB.dn)
 
     def query_montly_charges(self):
@@ -253,5 +253,5 @@ class NimStatDB(object):
         self._q = self._q.group_by(func.strftime('%Y-%m', RemoveEventDB.time))
 
     def query_weekly_charges(self):
-        self._q = self._session.query(func.strftime('%Y-%W', RemoveEventDB.time), func.sum(RemoveEventDB.charge))
+        self._q = self._session.query(func.strftime('%W', RemoveEventDB.time), func.sum(RemoveEventDB.charge))
         self._q = self._q.group_by(func.strftime('%Y-%W', RemoveEventDB.time))

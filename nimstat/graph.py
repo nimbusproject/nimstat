@@ -22,23 +22,35 @@ def max_pie_data(array, maxrows=None):
     a.append(("other", other))
     return a
 
+def pie_format(pct):
+    if pct < 3.0:
+        return ""
+    return "%5.1f%%" % (pct)
 
-def make_pie(array, filename, title=None):
+def make_pie(data, labels, filename, title=None):
     cla()
+
+    sum = 0
+    for d in data:
+        sum = sum + d
+
+    lbls = labels[:]
+    for i in range(0, len(data)):
+        pc = float(data[i]) / float(sum)
+        if pc < 0.03:
+            lbls[i] = ""
+            
     figure(1, figsize=(6,6))
-    labels = [x[0] for x in array]
-    data = [x[1] for x in array]
-    pie(data, labels=labels)
+    pie(data, autopct=pie_format, labels=lbls)
     if title:
-        pylab.title(title)
+        pylab.title("%s : Total %d" % (title, sum))
     savefig(filename, format='png' )
 
 
-def make_bar(array, filename, title=None, width=0.35, barcolor='r', xlabel=None, ylabel=None):
+def make_bar(data, labels, filename, title=None, width=0.35, barcolor='r', xlabel=None, ylabel=None):
     cla()
-    labels = [x[0] for x in array]
-    data = [x[1] for x in array]
-    N = len(array)
+
+    N = len(data)
     ind = np.arange(N)  # the x locations for the groups
     fig = plt.figure()
     ax = fig.add_subplot(111)

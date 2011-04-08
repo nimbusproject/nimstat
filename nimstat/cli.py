@@ -79,18 +79,18 @@ def parse_commands(argv):
     return (args, options)
 
 
-def _process(opts, db, name, limit=False):
-
-    name_for_files = name.lower().replace(" ", "_")
-
+def _process(opts, db):
     if opts.starttime:
         db.set_startdate(opts.starttime)
     if opts.endtime:
         db.set_enddate(opts.endtime)
 
     res = db.query()
-    if limit:
-        res = max_pie_data(res, opts.max)
+
+    return res
+
+def _writeit(opts, res, name):
+    name_for_files = name.lower().replace(" ", "_")
 
     fname = "%s/%s.csv" % (opts.outputdir, name_for_files)
     f = open(fname, "w")
@@ -103,16 +103,18 @@ def _process(opts, db, name, limit=False):
             delim = opts.delim
         f.write(os.linesep)
     f.close()
-
+    
+def _graphit(opts, data, labels, name):
     if not opts.graph:
         return
+    name_for_files = name.lower().replace(" ", "_")
 
     fname = "%s/%s_pie.png" % (opts.outputdir, name_for_files)
     print "creating the file %s" % (fname)
-    make_pie(res, fname, title=name)
+    make_pie(data, labels, fname, title=name)
     fname = "%s/%s_bar.png" % (opts.outputdir, name_for_files)
     print "creating the file %s" % (fname)
-    make_bar(res, fname, title=name)
+    make_bar(data, labels, fname, title=name)
 
 def main(argv=sys.argv[1:]):
 
@@ -133,32 +135,75 @@ def main(argv=sys.argv[1:]):
         pass
 
     if opts.user_charges:
-        db.query_charges()
-        _process(opts, db, "User Charges", limit=True)
+        name = "User Charges"
+        db.query_user_charges()
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        res = max_pie_data(res, opts.max)
+        data = [r[1] for r in res]
+        lbl = []
+        for x in res:
+            l = x[0]
+            if len(l) > 8:
+                lbl.append(l[-8:])
+            else:
+                lbl.append(l)
+        _graphit(opts, data, lbl, name)
 
     if opts.user_count:
-        db.query_charges()
-        _process(opts, db, "User Requests", limit=True)
+        name = "User Request Count"
+        db.query_user_count()
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        res = max_pie_data(res, opts.max)
+        data = [r[1] for r in res]
+        lbl = []
+        for x in res:
+            l = x[0]
+            if len(l) > 8:
+                lbl.append(l[-8:])
+            else:
+                lbl.append(l)
+        _graphit(opts, data, lbl, name)
 
     if opts.monthly_charges:
+        name = "Monthly Charges"
         db.query_montly_charges()
-        _process(opts, db, "Monthly Charges")
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        data = [r[1] for r in res]
+        labels = [r[0] for r in res]
+        _graphit(opts, data, labels, name)
 
     if opts.monthly_count:
-        db.query_montly_charges()
-        _process(opts, db, "Monthly Count")
+        name = "Monthly Request Count"
+        db.query_montly_count()
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        data = [r[1] for r in res]
+        labels = [r[0] for r in res]
+        _graphit(opts, data, labels, name)
 
     if opts.weekly_charges:
+        name = "Weekly Charges"
         db.query_weekly_charges()
-        _process(opts, db, "Weekly Charges")
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        data = [r[1] for r in res]
+        labels = [r[0] for r in res]
+        _graphit(opts, data, labels, name)
 
     if opts.weekly_count:
-        db.query_weekly_charges()
-        _process(opts, db, "Weekly Count")
-
-
+        name = "Weekly Request Count"
+        db.query_weekly_count()
+        res = _process(opts, db)
+        _writeit(opts, res, name)
+        data = [r[1] for r in res]
+        labels = [r[0] for r in res]
+        _graphit(opts, data, labels, name)
 
     print "\nSuccess"
+    return 0
 
 
 if __name__ == "__main__":
