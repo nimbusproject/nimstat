@@ -40,6 +40,7 @@ create_event_table = Table('create_events', metadata,
     Column('client_launch_name', String(1024)),
     Column('network', String(2048)),
     Column('event_type_id', Integer, ForeignKey('event_type.id')),
+    Column('record_import_name', String(64)),
     )
 
 remove_event_table = Table('remove_events', metadata,
@@ -215,43 +216,7 @@ class NimStatDB(object):
 
 
     def raw_sql(self, sql):
-        self._session.query("id", "name", "thenumber12").\
-            from_statement("SELECT id, name, 12 as "
-                   "thenumber12 FROM users where name=:name").\
-                   params(name='ed').all()
+        con = self._session.connection()
+        res = con.execute(sql)
+        return list(res)
 
-    def _create_query(self):
-        self._q = self._q.join(CreateEventDB).join(UserDB).join(EventTypeDB).join((RemoveEventDB, RemoveEventDB.uuid == CreateEventDB.uuid))
-
-    def set_startdate(self, date):
-        self._q = self._q.filter(RemoveEventDB.time >= date)
-
-    def set_enddate(self, date):
-        self._q = self._q.filter(RemoveEventDB.time <= date)
-
-    def query(self):
-        return self._q.all()
-
-    def query_user_count(self):
-        self._q = self._session.query(UserDB.dn, func.count(UserDB.dn), UserDB.dn).join(RemoveEventDB)
-        self._q = self._q.group_by(UserDB.dn)
-
-    def query_montly_count(self):
-        self._q = self._session.query(func.strftime('%Y-%m', RemoveEventDB.time), func.count(RemoveEventDB.charge))
-        self._q = self._q.group_by(func.strftime('%Y-%m', RemoveEventDB.time))
-
-    def query_weekly_count(self):
-        self._q = self._session.query(func.strftime('%W', RemoveEventDB.time), func.count(RemoveEventDB.charge))
-        self._q = self._q.group_by(func.strftime('%Y-%W', RemoveEventDB.time))
-
-    def query_user_charges(self):
-        self._q = self._session.query(UserDB.dn, func.sum(RemoveEventDB.charge), UserDB.dn).join(RemoveEventDB)
-        self._q = self._q.group_by(UserDB.dn)
-
-    def query_montly_charges(self):
-        self._q = self._session.query(func.strftime('%Y-%m', RemoveEventDB.time), func.sum(RemoveEventDB.charge))
-        self._q = self._q.group_by(func.strftime('%Y-%m', RemoveEventDB.time))
-
-    def query_weekly_charges(self):
-        self._q = self._session.query(func.strftime('%W', RemoveEventDB.time), func.sum(RemoveEventDB.charge))
-        self._q = self._q.group_by(func.strftime('%Y-%W', RemoveEventDB.time))

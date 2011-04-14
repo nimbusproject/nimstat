@@ -1,11 +1,14 @@
 import logging
+import logging.handlers
 
 Version = "0.1"
 
 def make_logger(log_level, dbname, logfile=None):
 
     if not logfile:
-        return None
+        return logging
+
+    print "Logging to %s" % (logfile)
 
     if log_level == "debug":
         loglevel = logging.DEBUG

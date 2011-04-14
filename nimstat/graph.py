@@ -47,7 +47,7 @@ def make_pie(data, labels, filename, title=None):
     savefig(filename, format='png' )
 
 
-def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel=None):
+def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel=None, legend=None):
     cla()
 
     x = arange(len(data))
@@ -59,8 +59,11 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
         color = c[i % len(c)]
         r = ax.bar([x[i],], [data[i],], color=color)
         legs.append(r[0])
-    #xticks( x + 0.5,  labels)
-    ax.legend(legs, labels)
+
+    if legend:
+        ax.legend(legs, legend)
+    else:
+        xticks( x + 0.5,  labels)
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:

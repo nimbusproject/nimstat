@@ -19,17 +19,15 @@ def parse_commands(argv):
     version = "nimstat " + (nimstat.Version)
     parser = OptionParser(usage=u, version=version)
 
-    opt = bootOpts("graph", "G", "Make graphs as well", True, flag=True)
-    opt.add_opt(parser)
-    opt = bootOpts("delim", "D", "Delimiter between csv fields", ',')
+    opt = bootOpts("delim", "d", "Delimiter between csv fields", ',')
     opt.add_opt(parser)
     opt = bootOpts("verbose", "v", "Print more output", 1, count=True)
     opt.add_opt(parser)
     opt = bootOpts("quiet", "q", "Print no output", False, flag=True)
     opt.add_opt(parser)
-    opt = bootOpts("load", "l", "load an accounting file into the database", None)
+    opt = bootOpts("load", "i", "load an accounting file into the database", None)
     opt.add_opt(parser)
-    opt = bootOpts("loglevel", "L", "Controls the level of detail in the log file", "info", vals=["debug", "info", "warn", "error"])
+    opt = bootOpts("loglevel", "l", "Controls the level of detail in the log file", "info", vals=["debug", "info", "warn", "error"])
     opt.add_opt(parser)
     opt = bootOpts("logfile", "F", "specify a log file", None)
     opt.add_opt(parser)
@@ -39,28 +37,62 @@ def parse_commands(argv):
     opt = bootOpts("endtime", "e", "Specify the latest time at which you want data YYYY:MM:DD:HH", None)
     opt.add_opt(parser)
 
-    opt = bootOpts("user_charges", "u", "Request the charges on a per user basis.", False, flag=True)
-    opt.add_opt(parser)
-    opt = bootOpts("user_count", "U", "Request the count on a per user basis.", False, flag=True)
-    opt.add_opt(parser)
-
-    opt = bootOpts("monthly_charges", "m", "Request the charges by month.", False, flag=True)
-    opt.add_opt(parser)
-    opt = bootOpts("monthly_count", "M", "Request the count by month.", False, flag=True)
-    opt.add_opt(parser)
-
-    opt = bootOpts("weekly_charges", "w", "Request the charges by month.", False, flag=True)
-    opt.add_opt(parser)
-    opt = bootOpts("weekly_count", "W", "Request the count by month.", False, flag=True)
-    opt.add_opt(parser)
-
-    opt = bootOpts("max", "x", "The maximum number of results to show in a graph (the least significant data will be grouped as 'other').  Only applies to user based requests", None)
+    opt = bootOpts("max", "m", "The maximum number of results to show in a graph (the least significant data will be grouped as 'other').  Only applies to user based requests", None)
     opt.add_opt(parser)
 
     opt = bootOpts("outputdir", "o", "The output directory where the graphs and data files will be created", os.path.expanduser("~/.nimstat/%s" % (str(uuid.uuid4()).split('-')[0])))
     opt.add_opt(parser)
 
+    # graph options
+    opt = bootOpts("xaxis", "X", "The x axis label", None)
+    opt.add_opt(parser)
+    opt = bootOpts("yaxis", "Y", "The y axis label", None)
+    opt.add_opt(parser)
+    opt = bootOpts("title", "T", "The Title of the Graph", None)
+    opt.add_opt(parser)
+    opt = bootOpts("xtics", "W", "Show X tic labels", False, flag=True)
+    opt.add_opt(parser)
+    opt = bootOpts("legend", "L", "Make a legend", False, flag=True)
+    opt.add_opt(parser)
+    opt = bootOpts("labellen", "Q", "Make a legend", None)
+    opt.add_opt(parser)
+
+
+    opt = bootOpts("column", "c", "Select the column", None,
+                    vals=["user.dn",
+                          "create_events.request_minutes",
+                          "create_events.charge",
+                          "create_events.cpu_count",
+                          "create_events.memory",
+                          "remove_events.charge",
+                          ])
+    opt.add_opt(parser)
+
+    opt = bootOpts("function", "f", "The function to perform on the selected data set", None,
+                    vals=["count",
+                          "sum"
+                          ])
+    opt.add_opt(parser)
+
+    opt = bootOpts("aggregator", "a", "The field to group by", None,
+                    vals=["weekly",
+                          "monthly",
+                          "user"
+                          ])
+    opt.add_opt(parser)
+
+    opt = bootOpts("graph", "G", "The type of graph to make", None,
+                    vals=["pie",
+                          "bar",
+                          "line"
+                          ])
+    opt.add_opt(parser)
+
+
     (options, args) = parser.parse_args(args=argv)
+
+    if not options.logfile:
+        options.logfile = options.outputdir + "/" + datetime.strftime(datetime.now(), "%m-%d-%Y__%H-%M") + ".log"
 
     if options.starttime:
         options.starttime = datetime.strptime(options.starttime, "%Y:%m:%d:%H")
@@ -72,6 +104,9 @@ def parse_commands(argv):
     except Exception, ex:
         print "Warning, an error happened while trying to make %s: %s" % (options.outputdir, str(ex))
 
+    if not options.title and options.column:
+        options.title = options.column + "__" + str(datetime.now())
+
     #if not options.count and not options.charges and not options.load:
     #    print "You must select count charges or load"
     #    sys.exit(1)
@@ -79,15 +114,6 @@ def parse_commands(argv):
     return (args, options)
 
 
-def _process(opts, db):
-    if opts.starttime:
-        db.set_startdate(opts.starttime)
-    if opts.endtime:
-        db.set_enddate(opts.endtime)
-
-    res = db.query()
-
-    return res
 
 def _writeit(opts, res, name):
     name_for_files = name.lower().replace(" ", "_")
@@ -103,18 +129,41 @@ def _writeit(opts, res, name):
             delim = opts.delim
         f.write(os.linesep)
     f.close()
-    
-def _graphit(opts, data, labels, name):
-    if not opts.graph:
-        return
-    name_for_files = name.lower().replace(" ", "_")
 
-    fname = "%s/%s_pie.png" % (opts.outputdir, name_for_files)
-    print "creating the file %s" % (fname)
-    make_pie(data, labels, fname, title=name)
-    fname = "%s/%s_bar.png" % (opts.outputdir, name_for_files)
-    print "creating the file %s" % (fname)
-    make_bar(data, labels, fname, title=name)
+def make_sql(opts):
+
+    ag_table = {}
+    ag_table['weekly'] = ("strftime('%W', create_events.time)", "strftime('%Y-%W', create_events.time)")
+    ag_table['monthly'] = ("strftime('%Y-%m', create_events.time)", "strftime('%Y-%m', create_events.time)")
+    ag_table['user'] = ("user.dn", "user.dn")
+
+    if not opts.column:
+        raise Exception("You need to select some column")
+
+    if opts.function:
+        columns = "%s(%s) " % (opts.function, opts.column)
+    else:
+        columns = "%s" % (opts.column)
+
+    if opts.aggregator:
+        ag = ag_table[opts.aggregator]
+        columns = "%s, %s" % (ag[0], columns)
+        group_by = "group by %s" % (ag[1])
+    else:
+        columns = "%s, %s" % (opts.column, columns)
+        group_by = ""
+
+    from_clause = "create_events, remove_events, user where create_events.user_id = user.id and create_events.uuid = remove_events.uuid"
+
+    if opts.starttime:
+        from_clause = "%s and create_events.time >= %s" % (from_clause, str(opts.starttime))
+    if opts.endtime:
+        from_clause = "%s and remove_events.time >= %s" % (from_clause, str(opts.endtime))
+
+    select = "select %s from %s %s" % (columns, from_clause, group_by)
+
+    return select
+
 
 def main(argv=sys.argv[1:]):
 
@@ -134,73 +183,34 @@ def main(argv=sys.argv[1:]):
         parse_file(opts.load, db, log=logger)
         pass
 
-    if opts.user_charges:
-        name = "User Charges"
-        db.query_user_charges()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        res = max_pie_data(res, opts.max)
-        data = [r[1] for r in res]
-        lbl = []
-        for x in res:
-            l = x[0]
-            if len(l) > 8:
-                lbl.append(l[-8:])
+    if opts.column:
+        select = make_sql(opts)
+        logger.info("query: %s" % (select))
+        res = db.raw_sql(select)
+        if opts.max:
+            res = max_pie_data(res, opts.max)
+        logger.info("results:")
+        for r in res:
+            logger.info("\t%s" % (str(r)))
+
+        _writeit(opts, res, opts.title)
+        if opts.graph:
+            graph_name = opts.outputdir + "/" + opts.title.lower().replace(" ", "_") + ".png"
+            data = [x[1] for x in res]
+            if opts.xtics:
+                labels = [x[0] for x in res]
+                if opts.labellen:
+                    labels = [x[-8:] for x in labels]
             else:
-                lbl.append(l)
-        _graphit(opts, data, lbl, name)
+                labels = ["" for x in res]
+            print "creating the graph %s" % (graph_name)
+            if opts.graph == "bar":
+                make_bar(data, labels, graph_name, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis)
+            if opts.graph == "pie":
+                make_pie(data, labels, graph_name, title=opts.title)
+            if opts.graph == "line":
+                pass
 
-    if opts.user_count:
-        name = "User Request Count"
-        db.query_user_count()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        res = max_pie_data(res, opts.max)
-        data = [r[1] for r in res]
-        lbl = []
-        for x in res:
-            l = x[0]
-            if len(l) > 8:
-                lbl.append(l[-8:])
-            else:
-                lbl.append(l)
-        _graphit(opts, data, lbl, name)
-
-    if opts.monthly_charges:
-        name = "Monthly Charges"
-        db.query_montly_charges()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        data = [r[1] for r in res]
-        labels = [r[0] for r in res]
-        _graphit(opts, data, labels, name)
-
-    if opts.monthly_count:
-        name = "Monthly Request Count"
-        db.query_montly_count()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        data = [r[1] for r in res]
-        labels = [r[0] for r in res]
-        _graphit(opts, data, labels, name)
-
-    if opts.weekly_charges:
-        name = "Weekly Charges"
-        db.query_weekly_charges()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        data = [r[1] for r in res]
-        labels = [r[0] for r in res]
-        _graphit(opts, data, labels, name)
-
-    if opts.weekly_count:
-        name = "Weekly Request Count"
-        db.query_weekly_count()
-        res = _process(opts, db)
-        _writeit(opts, res, name)
-        data = [r[1] for r in res]
-        labels = [r[0] for r in res]
-        _graphit(opts, data, labels, name)
 
     print "\nSuccess"
     return 0
