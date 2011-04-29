@@ -27,7 +27,7 @@ def pie_format(pct):
         return ""
     return "%5.1f%%" % (pct)
 
-def make_pie(data, labels, filename, title=None):
+def make_pie(data, labels, filename, title=None, subtitle=None):
     cla()
 
     sum = 0
@@ -43,11 +43,15 @@ def make_pie(data, labels, filename, title=None):
     figure(1, figsize=(6,6))
     pie(data, autopct=pie_format, labels=lbls)
     if title:
-        pylab.title("%s : Total %d" % (title, sum))
+        pylab.suptitle("%s : Total %d" % (title, sum))
+    if subtitle:
+        pylab.title(subtitle, size='small')
+
+
     savefig(filename, format='png' )
 
 
-def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel=None, legend=None):
+def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel=None, legend=None, subtitle=None):
     cla()
 
     x = arange(len(data))
@@ -63,13 +67,15 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     if legend:
         ax.legend(legs, legend)
     else:
-        xticks( x + 0.5,  labels)
+        xticks( x + 0.5,  labels, rotation=30, size='small')
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:
         ax.set_xlabel(xlabel)
+    if subtitle:
+        pylab.title(subtitle, size='small')
     if title:
-        ax.set_title(title)
+        suptitle(title)
 
     savefig(filename, format='png' )
 

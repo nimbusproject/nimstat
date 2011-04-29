@@ -6,7 +6,7 @@ from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
 from nimstat.graph import max_pie_data, make_pie, make_bar
 from nimstat.parser import *
-from optparse import OptionParser
+from optparse import OptionParser, SUPPRESS_HELP
 import os
 
 __author__ = 'bresnaha'
@@ -37,6 +37,9 @@ def parse_commands(argv):
     opt = bootOpts("endtime", "e", "Specify the latest time at which you want data YYYY:MM:DD:HH", None)
     opt.add_opt(parser)
 
+    opt = bootOpts("remotedebug", "x", SUPPRESS_HELP, False, flag=True)
+    opt.add_opt(parser)
+
     opt = bootOpts("max", "m", "The maximum number of results to show in a graph (the least significant data will be grouped as 'other').  Only applies to user based requests", None)
     opt.add_opt(parser)
 
@@ -49,6 +52,8 @@ def parse_commands(argv):
     opt = bootOpts("yaxis", "Y", "The y axis label", None)
     opt.add_opt(parser)
     opt = bootOpts("title", "T", "The Title of the Graph", None)
+    opt.add_opt(parser)
+    opt = bootOpts("subtitle", "S", "The Subtitle of the Graph", None)
     opt.add_opt(parser)
     opt = bootOpts("xtics", "W", "Show X tic labels", False, flag=True)
     opt.add_opt(parser)
@@ -90,6 +95,20 @@ def parse_commands(argv):
 
 
     (options, args) = parser.parse_args(args=argv)
+
+    if options.remotedebug:
+        try:
+            from pydev import pydevd
+            debug_cs = os.environ['NIMSTAT_DEBUG_CS'].split(':')
+            debug_host = debug_cs[0]
+            debug_port = int(debug_cs[1])
+            pydevd.settrace(debug_host, port=debug_port, stdoutToServer=True, stderrToServer=True)
+        except ImportError, e:
+            print "Could not import remote debugging library: %s\n" % str(e)
+        except KeyError:
+            print "If you want to do remote debugging please set the env NIMSTAT_DEBUG_CS to the contact string of you expected debugger.\n"
+        except:
+            print "Please verify the format of your contact string to be <hostname>:<port>.\n"
 
     if not options.logfile:
         options.logfile = options.outputdir + "/" + datetime.strftime(datetime.now(), "%m-%d-%Y__%H-%M") + ".log"
@@ -156,9 +175,9 @@ def make_sql(opts):
     from_clause = "create_events, remove_events, user where create_events.user_id = user.id and create_events.uuid = remove_events.uuid"
 
     if opts.starttime:
-        from_clause = "%s and create_events.time >= %s" % (from_clause, str(opts.starttime))
+        from_clause = "%s and create_events.time >= '%s'" % (from_clause, str(opts.starttime))
     if opts.endtime:
-        from_clause = "%s and remove_events.time >= %s" % (from_clause, str(opts.endtime))
+        from_clause = "%s and remove_events.time >= '%s'" % (from_clause, str(opts.endtime))
 
     select = "select %s from %s %s" % (columns, from_clause, group_by)
 
@@ -173,7 +192,8 @@ def main(argv=sys.argv[1:]):
         return 1
 
     logger = nimstat.make_logger(opts.loglevel, args[0], logfile=opts.logfile)
-    dburl = "sqlite:///%s" % (args[0])
+    dburl = "sqlite:///%s" % (os.path.expanduser(args[0]))
+    print "using database %s" % (dburl)
     db = NimStatDB(dburl, log=logger)
     if opts.load:
         if not os.path.exists(opts.load):
@@ -200,14 +220,14 @@ def main(argv=sys.argv[1:]):
             if opts.xtics:
                 labels = [x[0] for x in res]
                 if opts.labellen:
-                    labels = [x[-8:] for x in labels]
+                    labels = [x[-int(opts.labellen):] for x in labels]
             else:
                 labels = ["" for x in res]
             print "creating the graph %s" % (graph_name)
             if opts.graph == "bar":
-                make_bar(data, labels, graph_name, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis)
+                make_bar(data, labels, graph_name, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
             if opts.graph == "pie":
-                make_pie(data, labels, graph_name, title=opts.title)
+                make_pie(data, labels, graph_name, title=opts.title, subtitle=opts.subtitle)
             if opts.graph == "line":
                 pass
 
