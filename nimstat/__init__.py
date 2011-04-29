@@ -16,7 +16,7 @@ def make_logger(log_level, dbname, logfile=None):
         loglevel = logging.INFO
     elif log_level == "warn":
         loglevel = logging.WARN
-    elif log_level == "error":
+    else:
         loglevel = logging.ERROR
 
     if logfile == "-":
