@@ -1,8 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')
+
 from pylab import *
 import numpy as np
 import pylab
-import matplotlib
-matplotlib.use('Agg')
 
 __author__ = 'bresnaha'
 
