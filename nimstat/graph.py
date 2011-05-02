@@ -82,3 +82,42 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     savefig(filename, format='png' )
 
 
+def make_bar_percent(data, labels, filename, total, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
+    pdata = [(d/total)*100.0 for d in data]
+    data = pdata
+    cla()
+
+    x = arange(len(data))
+    fig = plt.figure()
+    c = "bgrcmy"
+    ax = fig.add_subplot(111)
+    legs = []
+    for i in range(0, len(data)):
+        color = c[i % len(c)]
+        r = ax.bar([x[i],], [data[i],], color=color)
+        legs.append(r[0])
+
+
+    ylabels = ["", "20%", "40%", "60%", "80%", "100%"]
+    y = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    print y
+    print ylabels
+    #ax.set_yticks(y)
+    ax.set_yticklabels(ylabels)
+    ax.set_ylim(0, 100)
+
+    if legend:
+        ax.legend(legs, legend)
+    else:
+        xticks( x + 0.5,  labels, rotation=30, size='small')
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if subtitle:
+        pylab.title(subtitle, size='small')
+    if title:
+        suptitle(title)
+
+    savefig(filename, format='png' )
+

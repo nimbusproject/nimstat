@@ -4,7 +4,7 @@ import uuid
 import nimstat
 from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
-from nimstat.graph import max_pie_data, make_pie, make_bar
+from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent
 from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
 import os
@@ -36,6 +36,10 @@ def parse_commands(argv):
     opt.add_opt(parser)
     opt = bootOpts("endtime", "e", "Specify the latest time at which you want data YYYY:MM:DD:HH", None)
     opt.add_opt(parser)
+
+    opt = bootOpts("percenttotal", "P", "A total possible number to graph a grouping against.", None)
+    opt.add_opt(parser)
+
 
     opt = bootOpts("remotedebug", "x", SUPPRESS_HELP, False, flag=True)
     opt.add_opt(parser)
@@ -89,7 +93,8 @@ def parse_commands(argv):
     opt = bootOpts("graph", "G", "The type of graph to make", None,
                     vals=["pie",
                           "bar",
-                          "line"
+                          "line",
+                          "percent"
                           ])
     opt.add_opt(parser)
 
@@ -230,6 +235,9 @@ def main(argv=sys.argv[1:]):
                 make_pie(data, labels, graph_name, title=opts.title, subtitle=opts.subtitle)
             if opts.graph == "line":
                 pass
+            if opts.graph == "percent":
+                make_bar_percent(data, labels, graph_name, float(opts.percenttotal), title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
+
 
 
     print "\nSuccess"
