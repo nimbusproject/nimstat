@@ -99,10 +99,7 @@ def make_bar_percent(data, labels, filename, total, title=None, xlabel=None, yla
 
 
     ylabels = ["", "20%", "40%", "60%", "80%", "100%"]
-    y = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    print y
-    print ylabels
-    #ax.set_yticks(y)
+    
     ax.set_yticklabels(ylabels)
     ax.set_ylim(0, 100)
 
