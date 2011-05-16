@@ -113,10 +113,11 @@ mapper(UserDB, user_table)
 
 class NimStatDB(object):
 
-    def __init__(self, dburl, module=None, log=logging):
+    def __init__(self, dburl, module=None, log=logging, default_cpu_count=1):
 
         self._commit_count = 0
         self._cloudconf_sections = {}
+        self.default_cpu_count = default_cpu_count
         
         if module == None:
             self._engine = sqlalchemy.create_engine(dburl)
@@ -182,6 +183,8 @@ class NimStatDB(object):
             event_ent.requested_minutes = attrs['requestMinutes']
             event_ent.charge = attrs['charge']
             event_ent.cpu_count = attrs['CPUCount']
+            if event_ent.cpu_count == -1:
+                event_ent.cpu_count = self.default_cpu_count
             event_ent.memory = attrs['memory']
             event_ent.vmm = attrs['vmm']
             event_ent.client_launch_name = attrs['clientLaunchName']

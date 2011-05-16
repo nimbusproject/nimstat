@@ -40,6 +40,8 @@ def parse_commands(argv):
     opt = bootOpts("percenttotal", "P", "A total possible number to graph a grouping against.", None)
     opt.add_opt(parser)
 
+    opt = bootOpts("defaultcpucount", "j", "Default CPU Count.", 1)
+    opt.add_opt(parser)
 
     opt = bootOpts("remotedebug", "x", SUPPRESS_HELP, False, flag=True)
     opt.add_opt(parser)
@@ -199,7 +201,7 @@ def main(argv=sys.argv[1:]):
     logger = nimstat.make_logger(opts.loglevel, args[0], logfile=opts.logfile)
     dburl = "sqlite:///%s" % (os.path.expanduser(args[0]))
     print "using database %s" % (dburl)
-    db = NimStatDB(dburl, log=logger)
+    db = NimStatDB(dburl, log=logger, default_cpu_count=opts.defaultcpucount)
     if opts.load:
         if not os.path.exists(opts.load):
             print "The accounting file %s does not exist." % (opts.load)
