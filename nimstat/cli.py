@@ -157,7 +157,7 @@ def _writeit(opts, res, name):
 def make_sql(opts):
 
     ag_table = {}
-    ag_table['weekly'] = ("strftime('%W', create_events.time)", "strftime('%Y-%W', create_events.time)")
+    ag_table['weekly'] = ("strftime('%m-%d-%Y', create_events.time)", "strftime('%Y-%W', create_events.time)")
     ag_table['monthly'] = ("strftime('%Y-%m', create_events.time)", "strftime('%Y-%m', create_events.time)")
     ag_table['user'] = ("user.dn", "user.dn")
 
