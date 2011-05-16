@@ -183,7 +183,7 @@ class NimStatDB(object):
             event_ent.requested_minutes = attrs['requestMinutes']
             event_ent.charge = attrs['charge']
             event_ent.cpu_count = attrs['CPUCount']
-            if event_ent.cpu_count == -1:
+            if event_ent.cpu_count is not None and int(event_ent.cpu_count) == -1:
                 event_ent.cpu_count = self.default_cpu_count
             event_ent.memory = attrs['memory']
             event_ent.vmm = attrs['vmm']
