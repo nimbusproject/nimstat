@@ -5,7 +5,7 @@ from pylab import *
 import numpy as np
 import pylab
 
-__author__ = 'bresnaha'
+
 
 # take a load of data and only return the top max members, the remainder will be returned as other
 def max_pie_data(array, maxrows=None):

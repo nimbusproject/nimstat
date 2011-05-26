@@ -1,7 +1,7 @@
 from datetime import datetime
 import sys
 
-__author__ = 'bresnaha'
+
 
 
 class Spinner(object):

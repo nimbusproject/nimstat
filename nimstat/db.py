@@ -12,7 +12,7 @@ from datetime import datetime
 from sqlalchemy import func
 import logging
 
-__author__ = 'bresnaha'
+
 
 metadata = MetaData()
 

@@ -4,7 +4,7 @@ import sys
 import logging
 from nimstat.output import Spinner
 
-__author__ = 'bresnaha'
+
 
 def parse_funky_line(line, event):
     line = line.strip()

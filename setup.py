@@ -1,7 +1,7 @@
 #!/usr/bin/env pythonv
 import os
 
-__author__ = 'bresnaha'
+
 
 try:
     from setuptools import setup

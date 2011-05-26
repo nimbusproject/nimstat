@@ -9,7 +9,7 @@ from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
 import os
 
-__author__ = 'bresnaha'
+
 
 def parse_commands(argv):
     global g_verbose
