@@ -58,6 +58,7 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
 
     x = arange(len(data))
     fig = plt.figure()
+    fig.subplots_adjust(bottom=0.3)
     c = "bgrcmy"
     ax = fig.add_subplot(111)
     legs = []
@@ -73,7 +74,7 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel, verticalalignment="bottom")
     if subtitle:
         pylab.title(subtitle, size='small')
     if title:
@@ -89,6 +90,7 @@ def make_bar_percent(data, labels, filename, total, title=None, xlabel=None, yla
 
     x = arange(len(data))
     fig = plt.figure()
+    fig.subplots_adjust(bottom=0.3)
     c = "bgrcmy"
     ax = fig.add_subplot(111)
     legs = []
@@ -106,11 +108,11 @@ def make_bar_percent(data, labels, filename, total, title=None, xlabel=None, yla
     if legend:
         ax.legend(legs, legend)
     else:
-        xticks( x + 0.5,  labels, rotation=30, size='small')
+        xticks( x + 0.5,  labels, rotation=30, size='x-small')
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel, verticalalignment="bottom", size='small')
     if subtitle:
         pylab.title(subtitle, size='small')
     if title:
