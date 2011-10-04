@@ -65,7 +65,7 @@ def parse_commands(argv):
     opt.add_opt(parser)
     opt = bootOpts("legend", "L", "Make a legend", False, flag=True)
     opt.add_opt(parser)
-    opt = bootOpts("labellen", "Q", "Make a legend", None)
+    opt = bootOpts("labellen", "Q", "Label length", None)
     opt.add_opt(parser)
 
 

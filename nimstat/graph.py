@@ -70,7 +70,7 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     if legend:
         ax.legend(legs, legend)
     else:
-        xticks( x + 0.5,  labels, rotation=30, size='small')
+        xticks( x + 0.5,  labels, rotation=30, size='x-small')
     if ylabel:
         ax.set_ylabel(ylabel)
     if xlabel:
