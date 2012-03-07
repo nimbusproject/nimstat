@@ -5,6 +5,7 @@ import nimstat
 from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
 from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent
+from nimstat.inca_uptime import get_url_load_db
 from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
 import os
@@ -100,6 +101,10 @@ def parse_commands(argv):
                           ])
     opt.add_opt(parser)
 
+    opt = bootOpts("loaduptime", "u", "load the uptime of the system from the FG inca data.  provide the testname", "nimbus-clientStatus")
+    opt.add_opt(parser)
+    opt = bootOpts("uptimehost", "K", "hostname for uptime", "hotel")
+    opt.add_opt(parser)
 
     (options, args) = parser.parse_args(args=argv)
 
@@ -209,6 +214,13 @@ def main(argv=sys.argv[1:]):
         print "loading the DB from %s" % (opts.load)
         parse_file(opts.load, db, log=logger)
         pass
+    if opts.loaduptime:
+        tstnm = opts.loaduptime
+        print "loading data from inca"
+        start_date = opts.starttime.strftime("%m%d%y")
+        end_date = opts.endtime.strftime("%m%d%y")
+        get_url_load_db(db, start_date, end_date, opts.uptimehost, test_name=tstnm)
+
 
     if opts.column:
         select = make_sql(opts)

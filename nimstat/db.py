@@ -59,6 +59,11 @@ groups_table = Table('groups', metadata,
     Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
     )
 
+service_available_table = Table('service_available', metadata,
+    Column('id', Integer, Sequence('service_available_id_seq'), primary_key=True),
+    Column('time', types.TIMESTAMP(), nullable=False, unique=True),
+    Column('test_name', String(1024), nullable=False),
+    )
 
 class EventTypeDB(object):
     def __init__(self):
@@ -102,6 +107,10 @@ class GroupsDB(object):
         self.name = None
         self.user = None
 
+class ServiceAvailableDB(object):
+    def __init__(self):
+        pass
+
 mapper(GroupsDB, create_event_table, properties={
     'groups': relation(EventTypeDB), 'user' : relation(UserDB)})
 mapper(CreateEventDB, create_event_table, properties={
@@ -110,6 +119,7 @@ mapper(RemoveEventDB, remove_event_table, properties={
     'event_type': relation(EventTypeDB), 'user' : relation(UserDB)})
 mapper(EventTypeDB, event_type_table)
 mapper(UserDB, user_table)
+mapper(ServiceAvailableDB, service_available_table)
 
 class NimStatDB(object):
 
@@ -155,6 +165,10 @@ class NimStatDB(object):
         if self._commit_count == 100:
             self._commit_count = 0
             self.commit()
+
+    def add_db_object(self, db_obj):
+        self._session.add(db_obj)
+        self.commit()
 
     def add_event(self, attrs, spinner=None):
         user_ent = self._session.query(UserDB).filter(UserDB.dn == attrs['dn']).all()
