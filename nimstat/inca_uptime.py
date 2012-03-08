@@ -85,4 +85,55 @@ def get_url_load_db(db, start_date, end_date, host, test_name="nimbus-clientStat
                 db.rollback()
 
 
-#print get_url('020112', '030212')
+def get_uptime_in_period(db, start_date, end_date, test_name="nimbus-clientStatus"):
+    res = db.get_tests_in_period(start_date, end_date, test_name)
+
+    # bucket the results into hours to avoid repeats
+    buckets = {}
+    for e in res:
+        tm_str = e.time.strftime("%m%d%y%H")
+        buckets[tm_str] = 60
+
+    total = 0
+    for k in buckets:
+        total = total + buckets[k]
+    return total
+
+
+def get_uptime_Ntime_buckets(db, start_date, end_date, ntime="%W%y", test_name="nimbus-clientStatus"):
+    res = db.get_tests_in_period(start_date, end_date, test_name)
+
+    # bucket the results into hours to avoid repeats
+    buckets = {}
+    for e in res:
+        tm_str = e.time.strftime("%m%d%y%H-"+ntime)
+        buckets[tm_str] = 60
+
+    week_buckets = {}
+    for k in buckets:
+        nk = k.split('-')[1]
+        if nk not in week_buckets:
+            week_buckets[nk] = 0
+        week_buckets[nk] = week_buckets[nk] + 60
+
+    order_list = []
+    keys = sorted(week_buckets.keys())
+    for k in keys:
+        order_list.append(week_buckets[k])
+
+    return order_list
+
+def get_uptime_month_buckets(db, start_date, end_date, test_name="nimbus-clientStatus"):
+    res = db.get_tests_in_period(start_date, end_date, test_name)
+
+    # bucket the results into hours to avoid repeats
+    buckets = {}
+    for e in res:
+        tm_str = e.time.strftime("%m%d%y%H")
+        buckets[tm_str] = 60
+
+    total = 0
+    for k in buckets:
+        total = total + buckets[k]
+    return total
+

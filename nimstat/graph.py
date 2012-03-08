@@ -49,7 +49,6 @@ def make_pie(data, labels, filename, title=None, subtitle=None):
     if subtitle:
         pylab.title(subtitle, size='small')
 
-
     savefig(filename, format='png' )
 
 
@@ -83,8 +82,13 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     savefig(filename, format='png' )
 
 
-def make_bar_percent(data, labels, filename, total, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
-    pdata = [(d/total)*100.0 for d in data]
+def make_bar_percent(data, labels, filename, denom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
+    if len(denom) != len(data):
+        raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
+
+    pdata = []
+    for i in range(0, len(data)):
+        pdata.append((data[i]/denom[i]) * 100.0)
     data = pdata
     cla()
 

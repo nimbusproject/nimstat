@@ -5,7 +5,7 @@ import nimstat
 from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
 from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent
-from nimstat.inca_uptime import get_url_load_db
+from nimstat.inca_uptime import get_url_load_db, get_uptime_in_period, get_uptime_Ntime_buckets
 from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
 import os
@@ -101,7 +101,7 @@ def parse_commands(argv):
                           ])
     opt.add_opt(parser)
 
-    opt = bootOpts("loaduptime", "u", "load the uptime of the system from the FG inca data.  provide the testname", "nimbus-clientStatus")
+    opt = bootOpts("loaduptime", "u", "load the uptime of the system from the FG inca data.  provide the testname", None) #"nimbus-clientStatus")
     opt.add_opt(parser)
     opt = bootOpts("uptimehost", "K", "hostname for uptime", "hotel")
     opt.add_opt(parser)
@@ -189,7 +189,7 @@ def make_sql(opts):
     if opts.starttime:
         from_clause = "%s and create_events.time >= '%s'" % (from_clause, str(opts.starttime))
     if opts.endtime:
-        from_clause = "%s and remove_events.time >= '%s'" % (from_clause, str(opts.endtime))
+        from_clause = "%s and remove_events.time <= '%s'" % (from_clause, str(opts.endtime))
 
     select = "select %s from %s %s" % (columns, from_clause, group_by)
 
@@ -250,7 +250,21 @@ def main(argv=sys.argv[1:]):
             if opts.graph == "line":
                 pass
             if opts.graph == "percent":
-                make_bar_percent(data, labels, graph_name, float(opts.percenttotal), title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
+                # get the denominator
+                if opts.aggregator == "weekly":
+                    w_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime)
+                    demon = [i * float(opts.percenttotal) for i in w_l]
+                elif opts.aggregator == "monthly":
+                    m_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime, ntime="%m%y")
+                    demon = [i * float(opts.percenttotal) for i in m_l]
+                else:
+                    demon = []
+                    total_mins = get_uptime_in_period(db, opts.starttime, opts.endtime) * float(opts.percenttotal)
+                    for i in data:
+                        demon.append(total_mins)
+
+                print demon
+                make_bar_percent(data, labels, graph_name, demon, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
 
 
 
