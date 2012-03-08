@@ -189,7 +189,7 @@ def make_sql(opts):
     if opts.starttime:
         from_clause = "%s and create_events.time >= '%s'" % (from_clause, str(opts.starttime))
     if opts.endtime:
-        from_clause = "%s and remove_events.time < '%s'" % (from_clause, str(opts.endtime))
+        from_clause = "%s and create_events.time < '%s'" % (from_clause, str(opts.endtime))
 
     select = "select %s from %s %s" % (columns, from_clause, group_by)
 
