@@ -85,6 +85,8 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
 
 def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
     if len(denom) != len(data):
+        print data
+        print denom
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
 
     pdata = []

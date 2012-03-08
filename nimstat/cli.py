@@ -261,9 +261,6 @@ def main(argv=sys.argv[1:]):
                     demon = [i * float(opts.percenttotal) for i in w_l]
                     total_denom = 7 * 24 * 60 * float(opts.percenttotal)
                     total_denom_list = [total_denom for i in demon]
-                    print "XXXXXXXXXXXX"
-                    print total_denom_list
-                    print total_denom
                 elif opts.aggregator == "monthly":
                     m_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime, ntime="%m%y")
                     demon = [i * float(opts.percenttotal) for i in m_l]
