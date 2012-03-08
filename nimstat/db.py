@@ -239,5 +239,5 @@ class NimStatDB(object):
 
     def get_tests_in_period(self, start_date, end_date, test_name):
         q = self._session.query(ServiceAvailableDB).filter(ServiceAvailableDB.test_name == test_name)
-        q = q.filter(ServiceAvailableDB.time >= start_date).filter(ServiceAvailableDB.time <= end_date)
+        q = q.filter(ServiceAvailableDB.time >= start_date).filter(ServiceAvailableDB.time < end_date)
         return q.all()
