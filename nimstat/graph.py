@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
+from pylab import arange
 from pylab import *
 import numpy as np
 import pylab
@@ -82,7 +83,7 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     savefig(filename, format='png' )
 
 
-def make_bar_percent(data, labels, filename, denom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
+def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
     if len(denom) != len(data):
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
 
@@ -90,6 +91,12 @@ def make_bar_percent(data, labels, filename, denom, title=None, xlabel=None, yla
     for i in range(0, len(data)):
         pdata.append((data[i]/denom[i]) * 100.0)
     data = pdata
+
+    # utilization data
+    udata = []
+    for i in range(0, len(maxdenom)):
+        udata.append((denom[i]/maxdenom[i]) * 100.0)
+
     cla()
 
     x = arange(len(data))
@@ -102,6 +109,10 @@ def make_bar_percent(data, labels, filename, denom, title=None, xlabel=None, yla
         color = c[i % len(c)]
         r = ax.bar([x[i],], [data[i],], color=color)
         legs.append(r[0])
+    ax.plot(x + 0.5, udata, "r", label='uptime percent', linewidth=2, marker='o')
+    print len(udata)
+    print len(x)
+    print udata
 
 
     ylabels = ["", "20%", "40%", "60%", "80%", "100%"]
@@ -123,4 +134,3 @@ def make_bar_percent(data, labels, filename, denom, title=None, xlabel=None, yla
         suptitle(title)
 
     savefig(filename, format='png' )
-
