@@ -4,7 +4,7 @@ import uuid
 import nimstat
 from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
-from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent
+from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent, make_stack_bar_percent
 from nimstat.inca_uptime import get_url_load_db, get_uptime_in_period, get_uptime_Ntime_buckets
 from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
@@ -42,6 +42,9 @@ def parse_commands(argv):
     opt.add_opt(parser)
 
     opt = bootOpts("defaultcpucount", "j", "Default CPU Count.", 1)
+    opt.add_opt(parser)
+
+    opt = bootOpts("makestack", "J", "use stacked bargrpah for usage", False, flag=True)
     opt.add_opt(parser)
 
     opt = bootOpts("remotedebug", "x", SUPPRESS_HELP, False, flag=True)
@@ -285,8 +288,10 @@ def main(argv=sys.argv[1:]):
                     total_denom = ts.total_seconds() / 60.0 * float(opts.percenttotal)
                     total_denom_list = [total_denom for i in demon]
 
-                make_bar_percent(data, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
-
+                if opts.makestack:
+                    make_stack_bar_percent(data, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
+                else:
+                    make_bar_percent(data, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
 
 
     print "\nSuccess"

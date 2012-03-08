@@ -112,13 +112,62 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
         r = ax.bar([x[i],], [data[i],], color=color)
         legs.append(r[0])
     ax.plot(x + 0.5, udata, "r", label='uptime percent', linewidth=2, marker='o')
-    print len(udata)
-    print len(x)
-    print udata
-
 
     ylabels = ["", "20%", "40%", "60%", "80%", "100%"]
     
+    ax.set_yticklabels(ylabels)
+    ax.set_ylim(0, 100)
+
+    if legend:
+        ax.legend(legs, legend)
+    else:
+        xticks( x + 0.5,  labels, rotation=30, size='x-small')
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    if xlabel:
+        ax.set_xlabel(xlabel, verticalalignment="bottom", size='small')
+    if subtitle:
+        pylab.title(subtitle, size='small')
+    if title:
+        suptitle(title)
+
+    savefig(filename, format='png' )
+
+def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
+    if len(uptime) != len(data):
+        print data
+        print denom
+        raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
+
+    pdata = []
+    for i in range(0, len(data)):
+        pdata.append((data[i]/maxdenom[i]) * 100.0)
+    data = pdata
+
+    # utilization data
+    updata = []
+    for i in range(0, len(maxdenom)):
+        updata.append(100.0 - ((uptime[i]/maxdenom[i]) * 100.0))
+
+    print maxdenom
+    print uptime
+    print updata
+    cla()
+
+    x = arange(len(data))
+    fig = plt.figure()
+    fig.subplots_adjust(bottom=0.3)
+    c = "bgrcmy"
+    ax = fig.add_subplot(111)
+    legs = []
+    for i in range(0, len(data)):
+        color = c[i % len(c)]
+        r = ax.bar([x[i],], [data[i],], color=color)
+        r2 = ax.bar([x[i],], [updata[i],], color="gray", bottom=[data[i],])
+        legs.append(r[0])
+
+    ylabels = ["", "20%", "40%", "60%", "80%", "100%"]
+
     ax.set_yticklabels(ylabels)
     ax.set_ylim(0, 100)
 
