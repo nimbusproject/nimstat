@@ -91,7 +91,10 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
 
     pdata = []
     for i in range(0, len(data)):
-        pdata.append((data[i]/denom[i]) * 100.0)
+        d = denom[i]
+        if d == 0:
+            d = maxdenom[i]
+        pdata.append((data[i]/d) * 100.0)
     data = pdata
 
     # utilization data

@@ -114,12 +114,8 @@ def get_uptime_week_buckets(db, start_date, end_date, test_name="nimbus-clientSt
     start_week = start_date.isocalendar()[1]
     end_week = end_date.isocalendar()[1]
     y = start_date.year - 2000
-    print "SDFSDFDSFDSFSDFDSF"
-    print start_week
-    print end_week
     for i in range(start_week, end_week):
         nk = "%02d%s" % (i, y)
-        print nk
         week_buckets[nk] = 0
 
     for k in buckets:
