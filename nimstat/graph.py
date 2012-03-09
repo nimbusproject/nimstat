@@ -137,6 +137,11 @@ def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None,
     if len(uptime) != len(data):
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
 
+    #sanitize
+    for i in range(0, len(uptime)):
+        if uptime[i] < data[i]:
+            uptime[i] = data[i]
+            print 'warning santizingdata at %d' % (i)
     pdata = []
     for i in range(0, len(data)):
         pdata.append((data[i]/maxdenom[i]) * 100.0)
