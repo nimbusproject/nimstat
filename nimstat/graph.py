@@ -135,6 +135,8 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
 
 def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
     if len(uptime) != len(data):
+        print uptime
+        print data
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(uptime), len(data)))
 
     #sanitize
