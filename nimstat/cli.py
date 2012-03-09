@@ -5,7 +5,7 @@ import nimstat
 from nimstat.cmdopts import bootOpts
 from nimstat.db import NimStatDB
 from nimstat.graph import max_pie_data, make_pie, make_bar, make_bar_percent, make_stack_bar_percent
-from nimstat.inca_uptime import get_url_load_db, get_uptime_in_period, get_uptime_Ntime_buckets
+from nimstat.inca_uptime import get_url_load_db, get_uptime_in_period, get_uptime_week_buckets
 from nimstat.parser import *
 from optparse import OptionParser, SUPPRESS_HELP
 import os
@@ -260,25 +260,26 @@ def main(argv=sys.argv[1:]):
             if opts.graph == "percent":
                 # get the denominator
                 if opts.aggregator == "weekly":
-                    w_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime)
+                    w_l = get_uptime_week_buckets(db, opts.starttime, opts.endtime)
                     demon = [i * float(opts.percenttotal) for i in w_l]
                     total_denom = 7 * 24 * 60 * float(opts.percenttotal)
                     total_denom_list = [total_denom for i in demon]
                 elif opts.aggregator == "monthly":
-                    m_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime, ntime="%m%y")
-                    demon = [i * float(opts.percenttotal) for i in m_l]
-                    # figure out the length of this month
-
-                    total_denom_list = []
-                    m = opts.starttime.month
-                    y = opts.starttime.year
-                    for i in range(0, len(demon)):
-                        mins = _mins_in_month(m, y) * float(opts.percenttotal)
-                        total_denom_list.append(mins)
-                        m = m + 1
-                        if m > 12:
-                            m = 1
-                            y = y + 1
+                    pass
+#                    m_l = get_uptime_Ntime_buckets(db, opts.starttime, opts.endtime, ntime="%m%y")
+#                    demon = [i * float(opts.percenttotal) for i in m_l]
+#                    # figure out the length of this month
+#
+#                    total_denom_list = []
+#                    m = opts.starttime.month
+#                    y = opts.starttime.year
+#                    for i in range(0, len(demon)):
+#                        mins = _mins_in_month(m, y) * float(opts.percenttotal)
+#                        total_denom_list.append(mins)
+#                        m = m + 1
+#                        if m > 12:
+#                            m = 1
+#                            y = y + 1
                 else:
                     demon = []
                     total_mins = get_uptime_in_period(db, opts.starttime, opts.endtime) * float(opts.percenttotal)

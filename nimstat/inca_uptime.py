@@ -99,10 +99,10 @@ def get_uptime_in_period(db, start_date, end_date, test_name="nimbus-clientStatu
         total = total + buckets[k]
     return total
 
-
-def get_uptime_Ntime_buckets(db, start_date, end_date, ntime="%W%y", test_name="nimbus-clientStatus"):
+def get_uptime_week_buckets(db, start_date, end_date, test_name="nimbus-clientStatus"):
     res = db.get_tests_in_period(start_date, end_date, test_name)
 
+    ntime="%W%y"
     # bucket the results into hours to avoid repeats
     buckets = {}
     for e in res:
@@ -110,6 +110,13 @@ def get_uptime_Ntime_buckets(db, start_date, end_date, ntime="%W%y", test_name="
         buckets[tm_str] = 60
 
     week_buckets = {}
+    # zero allentries out
+    start_week = start_date.isocalendar()[1]
+    end_week = end_date.isocalendar()[1]
+    y = start_date.year
+    for i in range(start_week, end_week):
+        nk = "%s%s" % (i, y)
+        week_buckets[nk] = 0
     for k in buckets:
         nk = k.split('-')[1]
         if nk not in week_buckets:
