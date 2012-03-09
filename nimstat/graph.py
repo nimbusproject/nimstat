@@ -149,9 +149,6 @@ def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None,
     for i in range(0, len(maxdenom)):
         updata.append(100.0 - ((uptime[i]/maxdenom[i]) * 100.0))
 
-    print maxdenom
-    print uptime
-    print updata
     cla()
 
     x = arange(len(data))
