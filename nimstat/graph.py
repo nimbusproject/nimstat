@@ -116,7 +116,8 @@ def sanitize_empty_week(data, maxdenom, labels):
 
 
 def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
-    (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
+    if len(denom) != len(data):
+        (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
     if len(denom) != len(data):
         print data
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
@@ -170,8 +171,9 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
 
 
 def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
-    # try to clean it up, this probably means that 1 week or month was missing from the db
-    (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
+    if len(uptime) != len(data):
+        # try to clean it up, this probably means that 1 week or month was missing from the db
+        (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
         
     if len(uptime) != len(data):
         print uptime
