@@ -9,7 +9,6 @@ import numpy as np
 import pylab
 
 
-
 # take a load of data and only return the top max members, the remainder will be returned as other
 def max_pie_data(array, maxrows=None):
     a = sorted(array, key=lambda x: x[1], reverse=True)
@@ -92,32 +91,35 @@ def sanitize_empty_week(data, maxdenom, labels):
     source_ndx = 0
     labels_dest = []
 
-    for ent in data:
-        data = ent[2]
-        da = data.split('-')
-        week = int(da[1])
+    try:
+        for ent in data:
+            data_ent = ent[2]
+            da = data_ent.split('-')
+            week = int(da[1])
 
-        if last_date is not None:
-            for i in range(last_date+1, week):
-                dst.append(0)
-                max_dst.append(1)
-                labels_dest.append('no data')
-        dst.append(ent[1])
-        max_dst.append(maxdenom[source_ndx])
-        labels_dest.append(labels[source_ndx])
-        last_date = week
-        source_ndx = source_ndx + 1
+            if last_date is not None:
+                for i in range(last_date+1, week):
+                    dst.append(0)
+                    max_dst.append(1)
+                    labels_dest.append('no data')
+            dst.append(ent[1])
+            max_dst.append(maxdenom[source_ndx])
+            labels_dest.append(labels[source_ndx])
+            last_date = week
+            source_ndx = source_ndx + 1
+    except Exception, ex:
+        print ex
+        data = [d[1] for d in data]
+        return (data, maxdenom, labels)
 
     return (dst, max_dst, labels_dest)
 
 
 def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
-    (data, denom, labels) = sanitize_empty_week(data, denom, labels)
+    (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
     if len(denom) != len(data):
-        print uptime
         print data
-
-        raise Exception("The numerator and demonimator have different lengths %d %d" % (len(uptime), len(data)))
+        raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
 
     pdata = []
     for i in range(0, len(data)):
