@@ -181,7 +181,7 @@ def make_sql(opts):
 
     if opts.aggregator:
         ag = ag_table[opts.aggregator]
-        columns = "%s, %s" % (ag[0], columns)
+        columns = "%s, %s, %s" % (ag[0], columns, ag[1])
         group_by = "group by %s" % (ag[1])
     else:
         columns = "%s, %s" % (opts.column, columns)
@@ -290,7 +290,7 @@ def main(argv=sys.argv[1:]):
                     total_denom_list = [total_denom for i in demon]
 
                 if opts.makestack:
-                    make_stack_bar_percent(data, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
+                    make_stack_bar_percent(res, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
                 else:
                     make_bar_percent(data, labels, graph_name, demon, total_denom_list, title=opts.title, xlabel=opts.xaxis, ylabel=opts.yaxis, subtitle=opts.subtitle)
 

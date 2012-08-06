@@ -1,4 +1,6 @@
 import matplotlib
+import datetime
+
 matplotlib.use('Agg')
 
 from pylab import arange
@@ -83,11 +85,41 @@ def make_bar(data, labels, filename, title=None, width=0.35, xlabel=None, ylabel
     savefig(filename, format='png' )
 
 
+def sanitize_empty_week(data, maxdenom, labels):
+    dst = []
+    max_dst = []
+    last_date = None
+    source_ndx = 0
+    labels_dest = []
+
+    for ent in data:
+        data = ent[2]
+        da = data.split('-')
+        week = int(da[1])
+
+        if last_date is not None:
+            for i in range(last_date+1, week):
+                dst.append(0)
+                max_dst.append(1)
+                labels_dest.append('no data')
+        dst.append(ent[1])
+        max_dst.append(maxdenom[source_ndx])
+        labels_dest.append(labels[source_ndx])
+        last_date = week
+        source_ndx = source_ndx + 1
+
+    return (dst, max_dst, labels_dest)
+
+
 def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
     if len(denom) != len(data):
-        print data
-        print denom
+        (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
+    if len(uptime) != len(data):
+        print uptime
+        print data
+
+        raise Exception("The numerator and demonimator have different lengths %d %d" % (len(uptime), len(data)))
 
     pdata = []
     for i in range(0, len(data)):
@@ -136,10 +168,18 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
 
     savefig(filename, format='png' )
 
+
 def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None, xlabel=None, ylabel=None, legend=None, subtitle=None):
     if len(uptime) != len(data):
         print uptime
         print data
+        # try to clean it up, this probably means that 1 week or month was missing from the db
+        (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
+        
+    if len(uptime) != len(data):
+        print uptime
+        print data
+
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(uptime), len(data)))
 
     #sanitize
@@ -152,6 +192,7 @@ def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None,
             print 'warning santizingdata at %d' % (i)
     pdata = []
     for i in range(0, len(data)):
+        print maxdenom[i]
         pdata.append((float(data[i])/float(maxdenom[i])) * 100.0)
     data = pdata
 
