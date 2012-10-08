@@ -53,8 +53,15 @@ def get_url(start_date, end_date):
 
 def get_url_load_db(db, start_date, end_date, host, test_name="nimbus-clientStatus"):
 
-    #test_name="nimbus-external-telnet"
-    u="http://inca.futuregrid.org:8080/inca/jsp/graph.jsp?printXML=true&series=%s_to_%s,inca,inca&startDate=%s&endDate=%s" % (test_name, host, start_date, end_date)
+    host_translation = {
+        'sierra': 'ucsd-sierra',
+        'hotel': 'uc-hotel',
+        'foxtrot': 'ufl-foxtrot',
+        'alamo': 'tacc-alamo'
+    }
+    inca_host = host_translation[host]
+
+    u="http://inca.futuregrid.org:8080/inca/jsp/graph.jsp?printXML=true&series=%s,inca,%s&startDate=%s&endDate=%s" % (test_name, inca_host, start_date, end_date)
 
     print "getting data from %s" % (u)
     f = urllib2.urlopen(u)
