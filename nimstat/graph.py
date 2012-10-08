@@ -187,8 +187,9 @@ def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None,
     print data
     print uptime
     for i in range(0, len(uptime)):
-        if uptime[i] < data[i]:
-            uptime[i] = data[i]
+        d = data[i]
+        if uptime[i] < d[1]:
+            uptime[i] = d[1]
             print 'warning santizing data at %d' % (i)
     pdata = []
     for i in range(0, len(data)):
@@ -202,7 +203,7 @@ def make_stack_bar_percent(data, labels, filename, uptime, maxdenom, title=None,
     updata = []
     for i in range(0, len(maxdenom)):
         d = uptime[i]
-        numer = d[1]
+        numer = d
         updata.append(100.0 - ((numer/float(maxdenom[i])) * 100.0))
 
     cla()
