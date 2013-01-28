@@ -109,11 +109,11 @@ def get_uptime_in_period(db, start_date, end_date, test_name="nimbus-clientStatu
 def get_uptime_week_buckets(db, start_date, end_date, test_name="nimbus-clientStatus"):
     res = db.get_tests_in_period(start_date, end_date, test_name)
 
-    ntime="%W%y"
     # bucket the results into hours to avoid repeats
     buckets = {}
     for e in res:
-        tm_str = e.time.strftime("%m%d%y%H-"+ntime)
+        weeknum = "%02d" % e.time.isocalendar()[1]
+        tm_str = e.time.strftime("%m%d%y%H-" + weeknum + "%y")
         buckets[tm_str] = 60
 
     week_buckets = {}
