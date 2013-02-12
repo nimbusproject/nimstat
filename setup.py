@@ -1,7 +1,6 @@
 #!/usr/bin/env pythonv
+
 import os
-
-
 
 try:
     from setuptools import setup
@@ -32,7 +31,7 @@ setup(name='nimstat',
       keywords = "Nimbus IaaS accounting graphs",
       long_description="""Some other time""",
       license="Apache2",
-      install_requires = ["sqlalchemy == 0.6", "matplotlib == 1.0.1"],
+      install_requires = ["sqlalchemy == 0.6", "matplotlib == 1.2.0"],
 
       classifiers=[
           'Development Status :: 4 - Beta',
