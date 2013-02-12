@@ -144,11 +144,28 @@ def get_uptime_month_buckets(db, start_date, end_date, test_name="nimbus-clientS
     # bucket the results into hours to avoid repeats
     buckets = {}
     for e in res:
-        tm_str = e.time.strftime("%m%d%y%H")
+        tm_str = e.time.strftime("%m%d%y%H-%m%y")
         buckets[tm_str] = 60
 
-    total = 0
+    month_buckets = {}
+    # zero allentries out
+    start_month = start_date.month
+    end_month = end_date.month
+    y = start_date.year - 2000
+    for i in range(start_month, end_month):
+        nk = "%02d%s" % (i, y)
+        month_buckets[nk] = 0
+
     for k in buckets:
-        total = total + buckets[k]
-    return total
+        nk = k.split('-')[1]
+        if nk not in month_buckets:
+            month_buckets[nk] = 0
+        month_buckets[nk] = month_buckets[nk] + 60
+
+    order_list = []
+    keys = sorted(month_buckets.keys())
+    for k in keys:
+        order_list.append(month_buckets[k])
+
+    return order_list
 
