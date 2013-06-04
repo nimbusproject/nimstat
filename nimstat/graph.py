@@ -120,6 +120,7 @@ def make_bar_percent(data, labels, filename, denom, maxdenom, title=None, xlabel
         (data, maxdenom, labels) = sanitize_empty_week(data, maxdenom, labels)
     if len(denom) != len(data):
         print data
+        print denom
         raise Exception("The numerator and demonimator have different lengths %d %d" % (len(denom), len(data)))
 
     pdata = []
