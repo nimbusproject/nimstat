@@ -251,7 +251,10 @@ def main(argv=sys.argv[1:]):
             graph_name = opts.outputdir + "/" + opts.title.lower().replace(" ", "_") + ".png"
             data = [x[1] for x in res]
             if opts.xtics:
-                labels = [x[2] for x in res]
+                if opts.aggregator == "weekly":
+                    labels = [x[2] for x in res]
+                else:
+                    labels = [x[0] for x in res]
                 if opts.labellen:
                     labels = [x[-int(opts.labellen):] for x in labels]
             else:
