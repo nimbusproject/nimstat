@@ -1,5 +1,6 @@
+from datetime import datetime, timedelta
+
 import matplotlib
-import datetime
 
 matplotlib.use('Agg')
 
@@ -93,16 +94,20 @@ def sanitize_empty_week(data, maxdenom, labels):
 
     try:
         for ent in data:
+            date = datetime.datetime.strptime(ent[0], '%m-%d-%Y')
             data_ent = ent[2]
             da = data_ent.split('-')
+            year = int(da[0])
             week = int(da[1])
 
             if last_date is not None:
-                for i in range(last_date+1, week):
-                    dst.append(0)
+                for i in range(last_date + 1, week):
+                    days = 7 * (i - last_date)
+                    new_date = date + timedelta(days=days)
+                    dst.append((new_date.strftime('%m-%d-%Y'), 0, new_date.strftime('%Y-%W')))
                     max_dst.append(1)
-                    labels_dest.append('no data')
-            dst.append(ent[1])
+                    labels_dest.append(new_date.strftime('%Y-%W'))
+            dst.append((ent[0], ent[1], ent[2]))
             max_dst.append(maxdenom[source_ndx])
             labels_dest.append(labels[source_ndx])
             last_date = week
@@ -111,6 +116,12 @@ def sanitize_empty_week(data, maxdenom, labels):
         print ex
         data = [d[1] for d in data]
         return (data, maxdenom, labels)
+
+    if len(dst) != len(maxdenom):
+        new_date = date + timedelta(days=7)
+        dst.append((new_date.strftime('%m-%d-%Y'), 0, new_date.strftime('%Y-%W')))
+        max_dst.append(1)
+        labels_dest.append(new_date.strftime('%Y-%W'))
 
     return (dst, max_dst, labels_dest)
 
